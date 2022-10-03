@@ -1,23 +1,27 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 
-var { getCars, addCar, getCarByPlate, updateMaintDate } = require('../controllers/cars')
+var {
+  getCars,
+  addCar,
+  getCarByPlate,
+  getCarByQr,
+
+  updateMaintDate,
+} = require("../controllers/cars");
 
 /* GET  a car by plate number. */
-router.get('/getcar', getCarByPlate);
-router.get('/getcar/:plate_no/:plate_str', getCarByPlate);
-
-
+router.get("/getcar", getCarByPlate);
+router.get("/getcar/:qr", getCarByQr);
+router.get("/getcar/:plate_no/:plate_str", getCarByPlate);
 
 /* GET all cars. */
-router.get('/', getCars);
-
+router.get("/", getCars);
 
 /* CREAT a car entry. */
-router.post('/', addCar);
+router.post("/", addCar);
 
 /* Update a car maintainance date. */
-router.put('/:id', updateMaintDate);
-
+router.put("/:id", updateMaintDate);
 
 module.exports = router;
