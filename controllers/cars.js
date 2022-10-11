@@ -1,121 +1,122 @@
-const Car = require("../models/car");
-const asyncHandler = require("../utils/async");
-var randomstring = require("randomstring");
+const Car = require('../models/car')
+const asyncHandler = require('../utils/async')
+var randomstring = require('randomstring')
 
 // @desc      Get cars
 // @route     GET /api/v1/cars
 // @access   TODO: Private
 exports.getCars = asyncHandler(async (req, res, next) => {
-  const cars = await Car.find();
+  const cars = await Car.find()
   return res.status(200).json({
     success: true,
     count: cars.length,
-    data: cars,
-  });
-});
+    data: cars
+  })
+})
 
 // @desc      creat a car entry
 // @route     POST /api/v1/cars
 // @access    TODO: Private
 exports.addCar = asyncHandler(async (req, res, next) => {
   // take time zone into considerating in date --- if we save the date directly some times a different day is stored in the db because if time zone differences
-  let _date = new Date(req.body.last_maintenance_date);
-  let _userOffset = _date.getTimezoneOffset() * 60 * 1000; // user's offset time
-  let _centralOffset = 6 * 60 * 60 * 1000; // 6 for central time - use whatever you need
-  _date = new Date(_date.getTime() - _userOffset + _centralOffset); // redefine variable
-  console.log("date", _date);
+  let _date = new Date(req.body.last_maintenance_date)
+  let _userOffset = _date.getTimezoneOffset() * 60 * 1000 // user's offset time
+  let _centralOffset = 6 * 60 * 60 * 1000 // 6 for central time - use whatever you need
+  _date = new Date(_date.getTime() - _userOffset + _centralOffset) // redefine variable
+  console.log('date', _date)
 
   const car = await Car.create({
-    plate_no: req.body.plate_no.split(" ").join(""),
-    plate_str: req.body.plate_str.split(" ").join(""),
-    qr_str: randomstring.generate(32),
-    maintenances: [_date],
-  });
+    plate_no: req.body.plate_no.split(' ').join(''),
+    plate_str: req.body.plate_str.split(' ').join(''),
+    qr_str: req.body.qrString,
+    maintenance_period: req.body?.maintenance_period,
+    maintenances: [_date]
+  })
   res.status(201).json({
     success: true,
-    data: car,
-  });
-});
+    data: car
+  })
+})
 
 // @desc      get a car by plate number
 // @route     GET /api/v1/cars/getcars/qr
 // @access   TODO: Private
 exports.getCarByQr = asyncHandler(async (req, res, next) => {
-  let qr = req.params.qr.split(" ").join("");
-  console.log({ qr });
+  let qr = req.params.qr.split(' ').join('')
+  console.log({ qr })
 
-  const car = await Car.find({ qr_str: qr });
-  console.log(car);
+  const car = await Car.find({ qr_str: qr })
+  console.log(car)
   if (car.length > 0) {
     return res.status(200).json({
       success: true,
-      data: car,
-    });
+      data: car
+    })
   } else {
     return res.status(404).json({
       success: false,
-      data: "not found",
-    });
+      data: 'not found'
+    })
   }
-});
+})
 
 // @desc      get a car by QR string
 // @route     GET /api/v1/cars/getcars
 // @access   TODO: Private
 exports.getCarByPlate = asyncHandler(async (req, res, next) => {
-  let plate_no = req.params.plate_no.split(" ").join("");
-  let plate_str = req.params.plate_str.split(" ").join("");
-  console.log({ plate_no, plate_str });
+  let plate_no = req.params.plate_no.split(' ').join('')
+  let plate_str = req.params.plate_str.split(' ').join('')
+  console.log({ plate_no, plate_str })
 
-  const car = await Car.find({ plate_no: plate_no, plate_str: plate_str });
-  console.log(car);
+  const car = await Car.find({ plate_no: plate_no, plate_str: plate_str })
+  console.log(car)
   if (car.length > 0) {
     return res.status(200).json({
       success: true,
-      data: car,
-    });
+      data: car
+    })
   } else {
     return res.status(404).json({
       success: false,
-      data: "not found",
-    });
+      data: 'not found'
+    })
   }
-});
+})
 
 // @desc      update a car's latest maintainence date
 // @route     GET /api/v1/cars/getcars
 // @access   TODO: Private
 exports.updateMaintDate = asyncHandler(async (req, res, next) => {
   //TODO: this controller is used to update notes as well .. separate the notes update logic later
-  let id = req.params.id;
-  const old_car = await Car.findById(id);
+  let id = req.params.id
+  const old_car = await Car.findById(id)
   if (old_car) {
-    let new_car = old_car;
+    let new_car = old_car
 
     // take time zone into considerating in date --- if we save the date directly some times a different day is stored in the db because if time zone differences
     if (req?.body?.new_maintainance_date) {
-      let _date = new Date(req.body.new_maintainance_date ?? "");
-      let _userOffset = _date.getTimezoneOffset() * 60 * 1000; // user's offset time
-      let _centralOffset = 6 * 60 * 60 * 1000; // 6 for central time - use whatever you need
-      _date = new Date(_date.getTime() - _userOffset + _centralOffset); // redefine variable
+      let _date = new Date(req.body.new_maintainance_date ?? '')
+      let _userOffset = _date.getTimezoneOffset() * 60 * 1000 // user's offset time
+      let _centralOffset = 6 * 60 * 60 * 1000 // 6 for central time - use whatever you need
+      _date = new Date(_date.getTime() - _userOffset + _centralOffset) // redefine variable
 
-      new_car.maintenances.push(_date);
+      new_car.maintenances.push(_date)
     }
 
     if (req?.body?.charger_note) {
-      new_car.charger_note = req?.body?.charger_note ?? "";
+      new_car.charger_note = req?.body?.charger_note ?? ''
     }
 
     if (req?.body?.maintenance_period) {
-      new_car.maintenance_period = req?.body?.maintenance_period ?? 30;
+      new_car.maintenance_period = req?.body?.maintenance_period ?? 30
     }
 
-    const saved_car = await Car.create(new_car);
-    return res.json({ saved_car });
+    const saved_car = await Car.create(new_car)
+    return res.json({ saved_car })
   } else {
     return res.status(404).json({
       success: false,
-      data: "not found",
-    });
+      data: 'not found'
+    })
   }
-});
+})
