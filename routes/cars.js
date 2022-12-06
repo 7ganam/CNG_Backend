@@ -16,6 +16,7 @@ router.get("/getcar/:qr", getCarByQr);
 router.get("/getcar/:plate_no/:plate_str", getCarByPlate);
 
 /* GET all cars. */
+
 router.get("/", getCars);
 
 /* CREAT a car entry. */
